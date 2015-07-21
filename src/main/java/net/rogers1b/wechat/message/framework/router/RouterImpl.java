@@ -1,0 +1,141 @@
+package net.rogers1b.wechat.message.framework.router;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import net.rogers1b.wechat.message.framework.MessageType;
+import net.rogers1b.wechat.message.framework.handler.RequestHandler;
+import net.rogers1b.wechat.message.framework.filter.Filter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.*;
+
+/**
+ * Created by Rogers on 15-7-16.
+ */
+public class RouterImpl implements Router<String> {
+    private static final Logger logger = LoggerFactory.getLogger(RouterImpl.class);
+
+    private long timeout = 4000;   // in milliseconds
+    // HashMap也是足够安全的
+    private ConcurrentMap<MessageType, RequestHandler<String>> handlers = new ConcurrentHashMap<>();
+
+    private Filter topFilter = null;
+
+    // async handler executing
+    private ExecutorService executorService;
+
+    @Override
+    public void registerHandler(RequestHandler<String> handler) {
+        Rules rulesAnnotation = null;
+        try {
+            rulesAnnotation = handler.getClass().getAnnotation(Rules.class);
+        }catch (NullPointerException e){
+            throw new IllegalArgumentException("未找到router rule,无效的RequestHandler！");
+        }
+
+        if(rulesAnnotation == null){
+            throw new IllegalArgumentException("未找到router rule,无效的RequestHandler！");
+        }
+        this.handlers.putIfAbsent(rulesAnnotation.value(), handler);
+    }
+
+    @Override
+    public List<RequestHandler> allHandlers() {
+        return null;
+    }
+
+    @Override
+    public void registerFilter(Filter filter) {
+        Rules rulesAnnotation;
+        if(filter == null){
+            throw new IllegalArgumentException("You are registering a null filter!");
+        }
+//        rulesAnnotation = filter.getClass().getAnnotation(Rules.class);
+//        if(rulesAnnotation == null) {
+//            throw new IllegalArgumentException("未找到router rule,无效的Interceptor！");
+//        }
+        this.topFilter = filter;
+    }
+
+    @Override
+    public List<Filter> allFilters() {
+        if(topFilter == null) {
+            throw new IllegalStateException("Filter还没有注册, 请先注册");
+        }
+        List<Filter> filters = new ArrayList<>();
+        Filter next = topFilter;
+        while (next.getSuccessor() != null){
+            filters.add(next);
+            next = next.getSuccessor();
+        }
+        return filters;
+    }
+
+
+    @Override
+    public String process(RequestContext context) {
+        Preconditions.checkArgument(null !=context.currentRule(), "未设置消息Rule");
+
+        // Filters先行
+        if(! adoptFilters(context)){
+            return onError();
+        }
+
+        RequestHandler<String> handler = findHandler(context.currentRule());
+        try {
+            handler.setContext(context);
+            Future<String> future = executorService.submit(handler.getCallable());
+            return future.get(timeout, TimeUnit.MILLISECONDS);
+        }catch (Exception e){
+            return onError();
+        }
+    }
+
+    @Override
+    public boolean adoptFilters(RequestContext context){
+        return topFilter.check(context);
+    }
+
+    @Override
+    public String onError(){
+        logger.debug("消息处理异常或超时");
+        return "";
+    }
+
+    @Override
+    public RequestHandler<String> findHandler(Rule rule) {
+        for(Map.Entry<MessageType, RequestHandler<String>> entry: handlers.entrySet()){
+            RequestHandler<String> handler = entry.getValue();
+            MessageType t = entry.getKey();
+            if(rule.matchWith(t)){
+                return handler;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void initialize() {
+        if (! handlers.isEmpty()){
+            executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()+1);
+        }else {
+            throw new RuntimeException("未找到注册的Request handler");
+        }
+    }
+
+    @Override
+    public void destroy(){
+        handlers.clear();
+        topFilter = null;
+        if(executorService != null){
+            executorService.shutdown();
+        }
+        logger.info("Router destroyed");
+    }
+}
