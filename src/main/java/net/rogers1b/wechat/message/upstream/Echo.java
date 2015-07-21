@@ -11,7 +11,7 @@ public final class Echo {
     static String textTpl =
             "<xml><ToUserName><![CDATA[{0}]]></ToUserName>" +
             "<FromUserName><![CDATA[{1}]]></FromUserName>" +
-            "<CreateTime>{2, number, long}</CreateTime>" +
+            "<CreateTime>{2}</CreateTime>" +
             "<MsgType><![CDATA[text]]></MsgType>" +
             "<Content><![CDATA[{3}]]></Content>" +
             "</xml>";
@@ -85,7 +85,7 @@ public final class Echo {
             "<FromUserName><![CDATA[{1}]]></FromUserName>" +
             "<CreateTime>{2}</CreateTime>" +
             "<MsgType><![CDATA[news]]></MsgType>" +
-            "<ArticleCount>{3, number, integer}</ArticleCount>" +
+            "<ArticleCount>{3}</ArticleCount>" +
             "<Articles>";
 
     static String articleTpl2 =
