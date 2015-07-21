@@ -84,6 +84,7 @@ public class RouterImpl implements Router<String> {
 
         // Filters先行
         if(! adoptFilters(context)){
+            logger.debug("消息被过滤");
             return onError();
         }
 
@@ -93,6 +94,7 @@ public class RouterImpl implements Router<String> {
             Future<String> future = executorService.submit(handler.getCallable());
             return future.get(timeout, TimeUnit.MILLISECONDS);
         }catch (Exception e){
+            logger.error("消息处理时发生异常：", e);
             return onError();
         }
     }

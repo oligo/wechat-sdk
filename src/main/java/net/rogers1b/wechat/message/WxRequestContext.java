@@ -33,7 +33,7 @@ public class WxRequestContext extends BasicRequestContext {
         if(dataMap.get("MsgType").equals("event")){
             rule = new WxRule((String)dataMap.get("MsgType"), (String) dataMap.get("FromUserName"), Long.parseLong((String)dataMap.get("CreateTime")));
         }else{
-            rule = new WxRule((String)dataMap.get("MsgType"), (String) dataMap.get("FromUserName"), (long)dataMap.get("MsgId"));
+            rule = new WxRule((String)dataMap.get("MsgType"), (String) dataMap.get("FromUserName"), Long.parseLong((String)dataMap.get("MsgId")));
         }
 
         return this;
