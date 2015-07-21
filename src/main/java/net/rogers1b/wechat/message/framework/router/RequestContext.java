@@ -21,7 +21,7 @@ public interface RequestContext {
 
     public Map<String, Object> getParsedData();
 
-    public void buildRule();
+    public RequestContext build();
 
     public Rule currentRule();
 }

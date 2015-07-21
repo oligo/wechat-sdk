@@ -59,7 +59,8 @@ public abstract class BasicRequestContext implements RequestContext {
         return rule;
     }
 
-    public abstract void buildRule();
+    @Override
+    public abstract RequestContext build();
 
     public abstract void parsePayload() throws Exception;
 

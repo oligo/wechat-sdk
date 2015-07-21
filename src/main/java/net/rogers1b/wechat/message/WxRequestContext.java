@@ -3,6 +3,7 @@ package net.rogers1b.wechat.message;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import net.rogers1b.wechat.message.framework.router.BasicRequestContext;
+import net.rogers1b.wechat.message.framework.router.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,6 @@ import java.io.InputStream;
  */
 public class WxRequestContext extends BasicRequestContext {
     private static final Logger logger = LoggerFactory.getLogger(WxRequestContext.class);
-    private WxRule rule;
 
     public WxRequestContext(InputStream payload) {
         super(payload);
@@ -23,7 +23,7 @@ public class WxRequestContext extends BasicRequestContext {
     }
 
     @Override
-    public void buildRule(){
+    public RequestContext build(){
         try {
             parsePayload();
         }catch (Exception e){
@@ -35,6 +35,8 @@ public class WxRequestContext extends BasicRequestContext {
         }else{
             rule = new WxRule((String)dataMap.get("MsgType"), (String) dataMap.get("FromUserName"), (long)dataMap.get("MsgId"));
         }
+
+        return this;
     }
 
     /**

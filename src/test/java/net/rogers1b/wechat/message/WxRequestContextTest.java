@@ -36,8 +36,8 @@ public class WxRequestContextTest {
     }
 
     @Test
-    public void testBuildRule() throws Exception {
-        context.buildRule();
+    public void testBuild() throws Exception {
+        context.build();
         System.out.println(context.getParsedData());
         System.out.println(context.currentRule());
     }
