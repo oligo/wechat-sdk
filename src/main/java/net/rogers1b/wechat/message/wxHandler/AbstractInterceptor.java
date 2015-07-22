@@ -12,12 +12,31 @@ public abstract class AbstractInterceptor implements Interceptor<String> {
     @Override
     public abstract String doWork(RequestContext context);
 
-    public Interceptor<String> setSuccessor(Interceptor<String> successor) throws Exception{
+    @Override
+    public Interceptor<String> setSuccessor(Interceptor<String> successor){
         this.successor = successor;
         return this.successor;
     }
 
-    public Interceptor<String> getSuccessor(){
+    @Override
+    public Interceptor<String> getSuccessor() {
         return this.successor;
+    }
+
+    @Override
+    public String start(RequestContext context) {
+        String result = doWork(context);
+        if (null == result) {
+            throw new RuntimeException("Interceptor#doWork should not return null");
+        }
+
+        if (!result.isEmpty()) {
+            return result;
+        } else if (this.getSuccessor() != null) {
+            return this.getSuccessor().doWork(context);
+        } else {
+            // 不能处理此事件。
+            return "";
+        }
     }
 }

@@ -1,5 +1,6 @@
 package net.rogers1b.wechat.message;
 
+import net.rogers1b.wechat.message.framework.Event;
 import net.rogers1b.wechat.message.framework.MessageType;
 import net.rogers1b.wechat.message.framework.router.Rule;
 
@@ -9,25 +10,27 @@ import net.rogers1b.wechat.message.framework.router.Rule;
 public class WxRule implements Rule {
     private String type;
     private String user;
-    private String msgId;
+    private long msgId;
+    private Event event;
     private long createTime;
 
-    public WxRule(String type, String user, String msgId) {
+    public WxRule(String type, String user, long msgId) {
         this.type = type;
         this.user = user;
         this.msgId = msgId;
     }
 
-    public WxRule(String type, String user, long createTime) {
+    public WxRule(String type, String event, String user, long createTime) {
         this.type = type;
         this.user = user;
+        this.event = Event.valueOf(event.toUpperCase());
         this.createTime = createTime;
     }
 
     @Override
     public String asString(){
         if(type.equals("event")){
-            return "/type/" + type + "/user/" + user + "/time/" + createTime;
+            return "/type/" + type + "/event/"+ event.toString().toLowerCase() + "/user/" + user + "/time/" + createTime;
         }else{
             return "/type/" + type + "/user/" + user + "/msgid" + msgId;
         }
@@ -46,11 +49,15 @@ public class WxRule implements Rule {
         return user;
     }
 
-    public String getMsgId() {
+    public long getMsgId() {
         return msgId;
     }
 
     public long getCreateTime() {
         return createTime;
+    }
+
+    public Event getEvent() {
+        return event;
     }
 }

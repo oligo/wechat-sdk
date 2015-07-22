@@ -30,7 +30,7 @@ public abstract class AbstractWxHandler implements RequestHandler<String>{
             @Override
             public String call() throws Exception {
 //                WxRule rule = (WxRule) context.currentRule();
-                return interceptor.doWork(context);
+                return interceptor.start(context);
             }
         };
     }
@@ -41,6 +41,17 @@ public abstract class AbstractWxHandler implements RequestHandler<String>{
             throw new IllegalArgumentException("Interceptor is null!");
         }
 
-        this.interceptor = interceptor;
+        if(this.interceptor == null){
+            this.interceptor = interceptor;
+        }else{
+            Interceptor<String> next = this.interceptor.getSuccessor();
+            while (next != null) {
+                next = next.getSuccessor();
+                if(next == null) {
+                    next = interceptor;
+                }
+            }
+        }
+
     }
 }

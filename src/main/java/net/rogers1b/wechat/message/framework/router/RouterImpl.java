@@ -89,6 +89,10 @@ public class RouterImpl implements Router<String> {
         }
 
         RequestHandler<String> handler = findHandler(context.currentRule());
+        if(handler == null){
+            logger.error("不能处理此消息, 未找到对应的消息处理器");
+            return onError();
+        }
         try {
             handler.setContext(context);
             Future<String> future = executorService.submit(handler.getCallable());

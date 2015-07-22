@@ -9,13 +9,14 @@ import net.rogers1b.wechat.message.framework.router.RequestContext;
  */
 public interface Interceptor<V> {
     /**
-     * 调用Interceptor，处理消息
+     * 调用Interceptor，处理消息, 勿直接调用此方法。
      *
      * @param context RequestContext
      * @return V return value of handler
      */
     public V doWork(RequestContext context);
 
+    public V start(RequestContext context);
     /**
      * 设置下一个Interceptor
      *
@@ -23,7 +24,7 @@ public interface Interceptor<V> {
      * @param successor
      * @return Interceptor 返回successor
      */
-    public Interceptor<V> setSuccessor(Interceptor<V> successor) throws Exception;
+    public Interceptor<V> setSuccessor(Interceptor<V> successor);
 
     public Interceptor<V> getSuccessor();
 }

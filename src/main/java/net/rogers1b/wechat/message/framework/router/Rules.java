@@ -5,7 +5,7 @@ import net.rogers1b.wechat.message.framework.MessageType;
 import java.lang.annotation.*;
 
 /**
- * value: java Regex pattern string
+ * value: {@link net.rogers1b.wechat.message.framework.MessageType}
  *
  * Created by Rogers on 15-7-16.
  */
