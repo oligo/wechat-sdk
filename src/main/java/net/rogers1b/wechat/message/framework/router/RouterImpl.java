@@ -56,10 +56,6 @@ public class RouterImpl implements Router<String> {
         if(filter == null){
             throw new IllegalArgumentException("You are registering a null filter!");
         }
-//        rulesAnnotation = filter.getClass().getAnnotation(Rules.class);
-//        if(rulesAnnotation == null) {
-//            throw new IllegalArgumentException("未找到router rule,无效的Interceptor！");
-//        }
         this.topFilter = filter;
     }
 
