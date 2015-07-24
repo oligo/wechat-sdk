@@ -44,13 +44,11 @@ public abstract class AbstractWxHandler implements RequestHandler<String>{
         if(this.interceptor == null){
             this.interceptor = interceptor;
         }else{
-            Interceptor<String> next = this.interceptor.getSuccessor();
-            while (next != null) {
-                next = next.getSuccessor();
-                if(next == null) {
-                    next = interceptor;
-                }
+            Interceptor<String> current = this.interceptor;
+            while (current.getSuccessor() != null) {
+                current = current.getSuccessor();
             }
+            current.setSuccessor(interceptor);
         }
 
     }
