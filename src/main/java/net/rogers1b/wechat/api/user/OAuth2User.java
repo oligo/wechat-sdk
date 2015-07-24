@@ -16,7 +16,7 @@ import java.io.IOException;
  *
  * @author Rogers
  */
-public class OAuth2Result {
+public class OAuth2User {
     private String accessToken;
     private String openId;
     private int expireTime;
@@ -72,7 +72,7 @@ public class OAuth2Result {
         return String.format(ACCESS_TOKEN_REQUEST_URL, appId, appSecret, code);
     }
 
-    public static OAuth2Result build(String appId, String appSecret, String code) throws WeiXinApiException{
+    public static OAuth2User build(String appId, String appSecret, String code) throws WeiXinApiException{
         JsonNode jsonResult;
         try {
             WeiXinApiInvoker invoker = new WeiXinApiInvoker();
@@ -80,7 +80,7 @@ public class OAuth2Result {
         }catch (IOException e){
             throw new RuntimeException(e);
         }
-        OAuth2Result o = new OAuth2Result();
+        OAuth2User o = new OAuth2User();
         o.setAccessToken(jsonResult.get("access_token").asText());
         o.setExpireTime(jsonResult.get("expires_in").asInt());
         o.setOpenId(jsonResult.get("openid").asText());

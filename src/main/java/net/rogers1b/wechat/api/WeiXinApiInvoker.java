@@ -59,11 +59,10 @@ public class WeiXinApiInvoker {
                         throw new RuntimeException(e1);
                     }
                 }
-            } finally {
-                httpClient.close();
             }
         } while (++retryTimes < maxRetryTimes);
 
+        httpClient.close();
         throw new RuntimeException("微信API异常，超出重试次数!");
     }
 
