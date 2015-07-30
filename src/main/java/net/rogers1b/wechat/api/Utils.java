@@ -9,9 +9,13 @@ package net.rogers1b.wechat.api;
 import net.rogers1b.wechat.api.accessToken.AccessToken;
 import net.rogers1b.wechat.api.accessToken.AccessTokenFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  *
@@ -53,8 +57,24 @@ public class Utils {
         
         return sb.toString();
     }
-    
+
+    public static String getCurrentRequestUrl(HttpServletRequest request){
+        StringBuffer requestUrl = request.getRequestURL();
+        String queryString = request.getQueryString();
+
+        if(queryString == null || queryString.isEmpty()){
+            return requestUrl.toString();
+        }else{
+            return requestUrl.append("?").append(queryString).toString();
+        }
+    }
+
     public static String getOauth2Url(String appId, String redirectUrl, String state){
-        return String.format(oauth2UrlTpl, appId, redirectUrl, state);        
+        try{
+            redirectUrl = URLEncoder.encode(redirectUrl, "UTF-8");
+        }catch(UnsupportedEncodingException e){
+            throw new RuntimeException(e);
+        }
+        return String.format(oauth2UrlTpl, appId, redirectUrl, state);
     }
 }

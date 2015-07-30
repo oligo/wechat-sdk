@@ -11,6 +11,9 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -31,12 +34,10 @@ public class MediaDownload {
 
     private String accessToken;
     private String mediaId;
-    private String basePath;
-    
-    public MediaDownload(String accessToken, String mediaId, String basePath) {
+
+    public MediaDownload(String accessToken, String mediaId) {
         this.accessToken = accessToken;
         this.mediaId = mediaId;
-        this.basePath = basePath.endsWith("/") ? basePath : basePath + "/";
     }
 
     
@@ -44,13 +45,13 @@ public class MediaDownload {
         return String.format(url, accessToken, mediaId);
     }
     
-    public String doRequest() throws IOException, WeiXinApiException {
+    public HttpResponse doRequest() throws IOException, WeiXinApiException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet request = new HttpGet(getUrl());
 
         try {
             CloseableHttpResponse response = httpClient.execute(request);
-            return saveFile(response);
+            return response;
         }catch (Exception e){
             logger.error("Downloading file failed: ", e);
             throw new RuntimeException(e);
@@ -59,13 +60,13 @@ public class MediaDownload {
         }
     }
     
-    private String saveFile(HttpResponse response) throws Exception{
+    public String saveToLocalDisk(HttpResponse response, String basePath) throws Exception{
+        basePath = basePath.endsWith("/") ? basePath : basePath + "/";
         HttpEntity entity = response.getEntity();
-        Header contentType = entity.getContentType();
-        String fileName = Utils.randomString(7) + "." + contentType.getValue().split("/")[1];
-
+        Header header = response.getFirstHeader("Content-Disposition");
+        String filename = parseContentDisposition(header.getValue());
         BufferedInputStream bis = new BufferedInputStream(entity.getContent());
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(this.basePath + fileName));
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(basePath + filename));
         
         int inByte;
         while(-1 != (inByte = bis.read())){
@@ -75,6 +76,26 @@ public class MediaDownload {
         bis.close();
         bos.close();
         
-        return fileName;
+        return filename;
+    }
+
+    public static String getFilename(HttpResponse response){
+        Header header = response.getFirstHeader("Content-Disposition");
+        return parseContentDisposition(header.getValue());
+    }
+
+    private static final Pattern CONTENT_DISPOSITION_PATTERN =
+            Pattern.compile("attachment;\\s*filename\\s*=\\s*\"([^\"]*)\"");
+
+    private static String parseContentDisposition(String contentDisposition){
+        try {
+            Matcher m = CONTENT_DISPOSITION_PATTERN.matcher(contentDisposition);
+            if (m.find()) {
+                return m.group(1);
+            }
+        } catch (IllegalStateException ex) {
+            return null;
+        }
+        return null;
     }
 }
