@@ -42,7 +42,7 @@ public class RouterImpl implements Router<String> {
         if(rulesAnnotation == null){
             throw new IllegalArgumentException("未找到router rule,无效的RequestHandler！");
         }
-        this.handlers.putIfAbsent(rulesAnnotation.value(), handler);
+        this.handlers.put(rulesAnnotation.value(), handler);
     }
 
     @Override

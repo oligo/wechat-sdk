@@ -46,7 +46,7 @@ public abstract class BasicRequestContext implements RequestContext {
 
     @Override
     public void setAttribute(String key, Object value) {
-        attributes.putIfAbsent(key, value);
+        attributes.put(key, value);
     }
 
     @Override

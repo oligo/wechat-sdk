@@ -59,7 +59,7 @@ public class WxRequestContext extends BasicRequestContext {
                     }
                     currentElement = elementName;
                     logger.debug(currentElement);
-                    dataMap.putIfAbsent(currentElement, reader.getElementText());
+                    dataMap.put(currentElement, reader.getElementText());
                     break;
 
                 case XMLStreamReader.END_DOCUMENT:
