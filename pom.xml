@@ -20,7 +20,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.oligo.wechat</groupId>
+    <groupId>com.github.oligo</groupId>
     <artifactId>wechat-sdk</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
