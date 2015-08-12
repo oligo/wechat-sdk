@@ -23,6 +23,8 @@ package com.github.oligo.wechat.api.js;
 
 import com.github.oligo.wechat.api.Utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -44,9 +46,13 @@ public class Signature {
 
     public Signature(String jsApiTicket, String url) {
         this.jsApiTicket = jsApiTicket;
-        this.url = url;
+        this.url = decodeUrl(url);
         this.nonceStr = Utils.randomString(16);
         this.timestamp = System.currentTimeMillis()/1000;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public String sign() {
@@ -68,5 +74,18 @@ public class Signature {
         rv.put("nonceStr", this.nonceStr);
         
         return rv;
+    }
+
+    public String decodeUrl(String url) {
+        try {
+            String decodedUrl = URLDecoder.decode(url, "utf-8");
+            if (decodedUrl.equals(url)) {
+                // Url is not encoded
+                return url;
+            }
+            return decodedUrl;
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }
