@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -70,13 +71,13 @@ public class MediaDownload {
      * @throws IOException http请求异常
      * @throws WeiXinApiException 微信接口异常
      */
-    public void doRequest() throws IOException, WeiXinApiException {
+    public HttpResponse doRequest() throws IOException, WeiXinApiException {
         this.httpClient = HttpClients.createDefault();
         HttpGet request = new HttpGet(getUrl());
 
         try {
-            CloseableHttpResponse response = httpClient.execute(request);
-            this.response = response;
+            this.response = httpClient.execute(request);
+            return this.response;
         }catch (Exception e) {
             logger.error("Downloading file failed: ", e);
             throw new RuntimeException(e);
