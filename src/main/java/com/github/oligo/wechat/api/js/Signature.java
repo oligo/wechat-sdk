@@ -51,8 +51,27 @@ public class Signature {
         this.timestamp = System.currentTimeMillis()/1000;
     }
 
+    public Signature() {
+    }
+
     public String getUrl() {
         return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = decodeUrl(url);
+    }
+
+    public void setJsApiTicket(String jsApiTicket) {
+        this.jsApiTicket = jsApiTicket;
+    }
+
+    public void setNonceStr(String nonceStr) {
+        this.nonceStr = nonceStr;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String sign() {
