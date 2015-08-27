@@ -22,7 +22,7 @@
 
     <groupId>com.github.oligo</groupId>
     <artifactId>wechat-sdk</artifactId>
-    <version>1.1</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
 
     <name>wechat-sdk</name>
