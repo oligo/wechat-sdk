@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -44,33 +43,53 @@ public class MediaDownload {
 
     private String accessToken;
     private String mediaId;
+    private CloseableHttpClient httpClient;
+    private CloseableHttpResponse response;
 
+    /**
+     * 多媒体文件下载
+     *
+     * @param accessToken 接口token
+     * @param mediaId 微信多媒体文件ID(参见微信文档)
+     */
     public MediaDownload(String accessToken, String mediaId) {
         this.accessToken = accessToken;
         this.mediaId = mediaId;
     }
 
-    
+    /**
+     *  文件请求URL
+      * @return url
+     */
     public String getUrl(){
         return String.format(url, accessToken, mediaId);
     }
-    
-    public HttpResponse doRequest() throws IOException, WeiXinApiException {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+
+    /**
+     * 发起请求
+     * @throws IOException http请求异常
+     * @throws WeiXinApiException 微信接口异常
+     */
+    public void doRequest() throws IOException, WeiXinApiException {
+        this.httpClient = HttpClients.createDefault();
         HttpGet request = new HttpGet(getUrl());
 
         try {
             CloseableHttpResponse response = httpClient.execute(request);
-            return response;
-        }catch (Exception e){
+            this.response = response;
+        }catch (Exception e) {
             logger.error("Downloading file failed: ", e);
             throw new RuntimeException(e);
-        } finally {
-            httpClient.close();
         }
     }
-    
-    public String saveToLocalDisk(HttpResponse response, String basePath) throws Exception{
+
+    /**
+     * 保存到本地文件
+     * @param basePath 保存文件的目录
+     * @return fileName
+     * @throws Exception
+     */
+    public String saveToLocalDisk(String basePath) throws Exception{
         basePath = basePath.endsWith("/") ? basePath : basePath + "/";
         HttpEntity entity = response.getEntity();
         Header header = response.getFirstHeader("Content-Disposition");
@@ -89,9 +108,24 @@ public class MediaDownload {
         return filename;
     }
 
-    public static String getFilename(HttpResponse response){
+    /**
+     * 从HTTP头获取文件名
+     * @return
+     */
+    public String getFilename(){
         Header header = response.getFirstHeader("Content-Disposition");
         return parseContentDisposition(header.getValue());
+    }
+
+    /**
+     * 关闭HTTPClient, 需要保证被调用
+     */
+    public void close(){
+        try {
+            this.httpClient.close();
+        }catch (IOException e){
+            throw new RuntimeException(e);
+        }
     }
 
     private static final Pattern CONTENT_DISPOSITION_PATTERN =
