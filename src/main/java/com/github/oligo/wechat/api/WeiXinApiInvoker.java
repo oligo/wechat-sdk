@@ -30,6 +30,9 @@ import java.io.IOException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
@@ -65,6 +68,37 @@ public class WeiXinApiInvoker {
                 CloseableHttpResponse response = httpClient.execute(request);
                 HttpEntity rspEntity = response.getEntity();
                 logger.debug("Wx API Request successfully executed");
+                return parseResult(rspEntity);
+            } catch (WeiXinApiException e) {
+                if (e.getErrorCode() == -1) {
+                    // 系统繁忙
+                    int sleepMillis = retryInternalInMillis * (1 << retryTimes);
+                    try {
+                        logger.debug("微信系统繁忙，{}ms 后重试(第{}次)", sleepMillis, retryTimes + 1);
+                        Thread.sleep(sleepMillis);
+                    } catch (InterruptedException e1) {
+                        throw new RuntimeException(e1);
+                    }
+                }
+            }
+        } while (++retryTimes < maxRetryTimes);
+
+        httpClient.close();
+        throw new RuntimeException("微信API异常，超出重试次数!");
+    }
+
+    public JsonNode doPost(String url, JsonNode data) throws IOException, WeiXinApiException{
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost post = new HttpPost(url);
+        StringEntity entity = new StringEntity(data.asText(), ContentType.APPLICATION_JSON);
+        post.setEntity(entity);
+
+        int retryTimes = 0;
+        do {
+            try {
+                CloseableHttpResponse response = httpClient.execute(post);
+                HttpEntity rspEntity = response.getEntity();
+                logger.debug("Post to Weixin API successfully executed");
                 return parseResult(rspEntity);
             } catch (WeiXinApiException e) {
                 if (e.getErrorCode() == -1) {
