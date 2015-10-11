@@ -25,9 +25,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.oligo.wechat.Helper;
 import com.github.oligo.wechat.exception.WeiXinApiException;
+import com.google.common.io.ByteSource;
+import com.google.common.io.CharStreams;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -123,10 +126,13 @@ public class WeiXinApiInvoker {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonObject = null;
 
+
+        String content = null;
         try {
-            jsonObject = mapper.readTree(entity.getContent());
+            content = CharStreams.toString(new InputStreamReader(entity.getContent(), "UTF-8"));
+            jsonObject = mapper.readTree(content);
         } catch (IOException e) {
-            logger.error("Parsing json failed!");
+            logger.error("Parsing json failed, raw data is\n:" + content);
             throw new RuntimeException(e);
         }
         // API error to exception
