@@ -16,6 +16,7 @@
 
 package com.github.oligo.wechat.api.media;
 
+import com.github.oligo.wechat.Helper;
 import com.github.oligo.wechat.exception.WeiXinApiException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -72,7 +73,7 @@ public class MediaDownload {
      * @throws WeiXinApiException 微信接口异常
      */
     public HttpResponse doRequest() throws IOException, WeiXinApiException {
-        this.httpClient = HttpClients.createDefault();
+        this.httpClient = Helper.getHttpClient();
         HttpGet request = new HttpGet(getUrl());
 
         try {

@@ -23,6 +23,7 @@ package com.github.oligo.wechat.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.oligo.wechat.Helper;
 import com.github.oligo.wechat.exception.WeiXinApiException;
 import org.apache.http.client.methods.HttpGet;
 
@@ -60,7 +61,7 @@ public class WeiXinApiInvoker {
      * @throws com.github.oligo.wechat.exception.WeiXinApiException 微信API异常
      */
     public JsonNode doRequest(String url) throws IOException, WeiXinApiException {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpClient httpClient = Helper.getHttpClient();
         HttpGet request = new HttpGet(url);
         int retryTimes = 0;
         do {
@@ -88,7 +89,7 @@ public class WeiXinApiInvoker {
     }
 
     public JsonNode doPost(String url, JsonNode data) throws IOException, WeiXinApiException{
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpClient httpClient = Helper.getHttpClient();
         HttpPost post = new HttpPost(url);
         StringEntity entity = new StringEntity(data.asText(), ContentType.APPLICATION_JSON);
         post.setEntity(entity);
